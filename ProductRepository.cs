@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Cinnova.Product;
@@ -19,6 +20,12 @@ public class ProductRepository : IProductRepository
             .Select(p => new ProductDto(p.Id, p.Name, p.Price, p.IsActive))
             .ToListAsync();
     }
+
+    public async Task<int> CountAsync(CancellationToken cancellationToken = default)
+        => await _context.Products.CountAsync(cancellationToken);
+
+    public async Task<bool> ExistsByIdAsync(int id, CancellationToken cancellationToken = default)
+        => await _context.Products.AnyAsync(p => p.Id == id, cancellationToken);
 
     public async Task<ProductDto?> GetByIdAsync(int id)
     {
