@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Cinnova.Product;
 
@@ -33,7 +34,9 @@ public class ProductService
     public async Task<bool> ProductExistsAsync(int id, CancellationToken cancellationToken = default)
         => await _repository.ExistsByIdAsync(id, cancellationToken);
 
-    // Returns all active products
     public async Task<IEnumerable<ProductDto>> GetActiveProductsAsync(CancellationToken cancellationToken = default)
-        => await _repository.GetActiveAsync(cancellationToken);
+    {
+        var products = await _repository.GetAllAsync(cancellationToken);
+        return products.Where(p => p.IsActive);
+    }
 }
