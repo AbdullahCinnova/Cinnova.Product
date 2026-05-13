@@ -21,6 +21,14 @@ public class ProductRepository : IProductRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<IEnumerable<ProductDto>> GetActiveAsync(CancellationToken cancellationToken = default)
+    {
+        return await _context.Products
+            .Where(product => product.IsActive)
+            .Select(product => new ProductDto(product.Id, product.Name, product.Price, product.IsActive))
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<int> CountAsync(CancellationToken cancellationToken = default)
         => await _context.Products.CountAsync(cancellationToken);
 
@@ -29,7 +37,7 @@ public class ProductRepository : IProductRepository
 
     public async Task<ProductDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        var p = await _context.Products.FirstOrDefaultAsync(product => product.Id == id, cancellationToken);
+        var p = await _context.Products.FindAsync([id], cancellationToken);
         return p == null ? null : new ProductDto(p.Id, p.Name, p.Price, p.IsActive);
     }
 
@@ -43,13 +51,17 @@ public class ProductRepository : IProductRepository
 
 public class ProductDbContext : DbContext
 {
+    public ProductDbContext(DbContextOptions<ProductDbContext> options) : base(options)
+    {
+    }
+
     public DbSet<Product> Products { get; set; }
 }
 
 public class Product
 {
     public int Id { get; set; }
-    public string Name { get; set; }
+    public string Name { get; set; } = string.Empty;
     public decimal Price { get; set; }
     public bool IsActive { get; set; }
 }

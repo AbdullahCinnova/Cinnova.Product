@@ -67,37 +67,31 @@ public sealed class ProductServiceTests
     }
 
     [TestMethod]
-    public async Task GetActiveProductsAsync_ShouldReturnOnlyActiveProducts_WhenRepositoryReturnsMixedProducts()
+    public async Task GetActiveProductsAsync_ShouldReturnActiveProducts_WhenRepositoryReturnsActiveProducts()
     {
         var repository = new Mock<IProductRepository>();
-        var products = new[]
+        var activeProducts = new[]
         {
             new ProductDto(1, "A", 10m, true),
-            new ProductDto(2, "B", 11m, false),
             new ProductDto(3, "C", 12m, true)
         };
 
-        repository.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync(products);
+        repository.Setup(r => r.GetActiveAsync(It.IsAny<CancellationToken>())).ReturnsAsync(activeProducts);
         var sut = new ProductService(repository.Object);
 
-        var activeProducts = (await sut.GetActiveProductsAsync()).ToArray();
+        var result = (await sut.GetActiveProductsAsync()).ToArray();
 
-        activeProducts.Should().HaveCount(2);
-        activeProducts.Should().OnlyContain(p => p.IsActive);
-        activeProducts.Select(p => p.Id).Should().BeEquivalentTo([1, 3]);
+        result.Should().HaveCount(2);
+        result.Should().OnlyContain(p => p.IsActive);
+        result.Select(p => p.Id).Should().BeEquivalentTo([1, 3]);
     }
 
     [TestMethod]
     public async Task GetActiveProductsAsync_ShouldReturnEmpty_WhenRepositoryReturnsNoActiveProducts()
     {
         var repository = new Mock<IProductRepository>();
-        var products = new[]
-        {
-            new ProductDto(1, "A", 10m, false),
-            new ProductDto(2, "B", 11m, false)
-        };
-
-        repository.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync(products);
+        repository.Setup(r => r.GetActiveAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Array.Empty<ProductDto>());
         var sut = new ProductService(repository.Object);
 
         var activeProducts = await sut.GetActiveProductsAsync();
@@ -113,7 +107,7 @@ public sealed class ProductServiceTests
 
         repository.Setup(r => r.CountAsync(cancellationToken)).ReturnsAsync(0);
         repository.Setup(r => r.ExistsByIdAsync(7, cancellationToken)).ReturnsAsync(false);
-        repository.Setup(r => r.GetAllAsync(cancellationToken))
+        repository.Setup(r => r.GetActiveAsync(cancellationToken))
             .ReturnsAsync(new[] { new ProductDto(1, "A", 1m, true) });
         var sut = new ProductService(repository.Object);
 
@@ -123,6 +117,6 @@ public sealed class ProductServiceTests
 
         repository.Verify(r => r.CountAsync(cancellationToken), Times.Once);
         repository.Verify(r => r.ExistsByIdAsync(7, cancellationToken), Times.Once);
-        repository.Verify(r => r.GetAllAsync(cancellationToken), Times.Once);
+        repository.Verify(r => r.GetActiveAsync(cancellationToken), Times.Once);
     }
 }
