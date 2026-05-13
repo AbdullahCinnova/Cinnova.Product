@@ -27,10 +27,7 @@ public class ProductService
     }
     // Returns the total number of products
     public async Task<int> GetProductCountAsync(CancellationToken cancellationToken = default)
-    {
-        var products = await _repository.GetAllAsync(cancellationToken);
-        return products.Count();
-    }
+        => await _repository.CountAsync(cancellationToken);
 
     // Checks if a product exists by id
     public async Task<bool> ProductExistsAsync(int id, CancellationToken cancellationToken = default)
