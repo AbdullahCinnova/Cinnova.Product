@@ -10,11 +10,10 @@ public sealed class ProductControllerTests
     [TestMethod]
     public async Task GetAll_ServiceReturnsProducts_ReturnsOkResultWithProducts()
     {
-        var repository = new Mock<IProductRepository>();
+        var service = new Mock<IProductService>();
         var products = new[] { new ProductDto(1, "A", 10m, true), new ProductDto(2, "B", 20m, false) };
-        repository.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync(products);
-        var service = new ProductService(repository.Object);
-        var controller = new ProductController(service);
+        service.Setup(s => s.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync(products);
+        var controller = new ProductController(service.Object);
 
         var result = await controller.GetAll();
 
@@ -26,11 +25,10 @@ public sealed class ProductControllerTests
     [TestMethod]
     public async Task GetById_ProductExists_ReturnsOkResultWithProduct()
     {
-        var repository = new Mock<IProductRepository>();
+        var service = new Mock<IProductService>();
         var product = new ProductDto(1, "A", 10m, true);
-        repository.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(product);
-        var service = new ProductService(repository.Object);
-        var controller = new ProductController(service);
+        service.Setup(s => s.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(product);
+        var controller = new ProductController(service.Object);
 
         var result = await controller.GetById(1);
 
@@ -41,10 +39,9 @@ public sealed class ProductControllerTests
     [TestMethod]
     public async Task GetById_ProductDoesNotExist_ReturnsNotFound()
     {
-        var repository = new Mock<IProductRepository>();
-        repository.Setup(r => r.GetByIdAsync(5, It.IsAny<CancellationToken>())).ReturnsAsync((ProductDto?)null);
-        var service = new ProductService(repository.Object);
-        var controller = new ProductController(service);
+        var service = new Mock<IProductService>();
+        service.Setup(s => s.GetByIdAsync(5, It.IsAny<CancellationToken>())).ReturnsAsync((ProductDto?)null);
+        var controller = new ProductController(service.Object);
 
         var result = await controller.GetById(5);
 
