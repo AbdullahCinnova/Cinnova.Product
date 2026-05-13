@@ -14,11 +14,19 @@ public class ProductRepository : IProductRepository
         _context = context;
     }
 
-    public async Task<IEnumerable<ProductDto>> GetAllAsync()
+    public async Task<IEnumerable<ProductDto>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         return await _context.Products
             .Select(p => new ProductDto(p.Id, p.Name, p.Price, p.IsActive))
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<IEnumerable<ProductDto>> GetActiveAsync(CancellationToken cancellationToken = default)
+    {
+        return await _context.Products
+            .Where(product => product.IsActive)
+            .Select(product => new ProductDto(product.Id, product.Name, product.Price, product.IsActive))
+            .ToListAsync(cancellationToken);
     }
 
     public async Task<int> CountAsync(CancellationToken cancellationToken = default)
@@ -27,29 +35,33 @@ public class ProductRepository : IProductRepository
     public async Task<bool> ExistsByIdAsync(int id, CancellationToken cancellationToken = default)
         => await _context.Products.AnyAsync(p => p.Id == id, cancellationToken);
 
-    public async Task<ProductDto?> GetByIdAsync(int id)
+    public async Task<ProductDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        var p = await _context.Products.FindAsync(id);
+        var p = await _context.Products.FindAsync([id], cancellationToken);
         return p == null ? null : new ProductDto(p.Id, p.Name, p.Price, p.IsActive);
     }
 
-    public async Task AddAsync(ProductDto product)
+    public async Task AddAsync(ProductDto product, CancellationToken cancellationToken = default)
     {
         var entity = new Product { Name = product.Name, Price = product.Price, IsActive = product.IsActive };
         _context.Products.Add(entity);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(cancellationToken);
     }
 }
 
 public class ProductDbContext : DbContext
 {
+    public ProductDbContext(DbContextOptions<ProductDbContext> options) : base(options)
+    {
+    }
+
     public DbSet<Product> Products { get; set; }
 }
 
 public class Product
 {
     public int Id { get; set; }
-    public string Name { get; set; }
+    public string Name { get; set; } = string.Empty;
     public decimal Price { get; set; }
     public bool IsActive { get; set; }
 }

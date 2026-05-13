@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Cinnova.Product;
 
-public class ProductService
+public class ProductService : IProductService
 {
     private readonly IProductRepository _repository;
 
@@ -33,7 +33,6 @@ public class ProductService
     public async Task<bool> ProductExistsAsync(int id, CancellationToken cancellationToken = default)
         => await _repository.ExistsByIdAsync(id, cancellationToken);
 
-    // Returns all active products
     public async Task<IEnumerable<ProductDto>> GetActiveProductsAsync(CancellationToken cancellationToken = default)
         => await _repository.GetActiveAsync(cancellationToken);
 }
