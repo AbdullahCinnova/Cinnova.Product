@@ -41,8 +41,5 @@ public class ProductService
 
     // Returns all active products
     public async Task<IEnumerable<ProductDto>> GetActiveProductsAsync(CancellationToken cancellationToken = default)
-    {
-        var products = await _repository.GetAllAsync(cancellationToken);
-        return products.Where(p => p.IsActive);
-    }
+        => await _repository.GetActiveAsync(cancellationToken);
 }
