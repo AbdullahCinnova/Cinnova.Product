@@ -31,10 +31,7 @@ public class ProductService
 
     // Checks if a product exists by id
     public async Task<bool> ProductExistsAsync(int id, CancellationToken cancellationToken = default)
-    {
-        var product = await _repository.GetByIdAsync(id, cancellationToken);
-        return product != null;
-    }
+        => await _repository.ExistsByIdAsync(id, cancellationToken);
 
     // Returns all active products
     public async Task<IEnumerable<ProductDto>> GetActiveProductsAsync(CancellationToken cancellationToken = default)

@@ -24,6 +24,9 @@ public class ProductRepository : IProductRepository
     public async Task<int> CountAsync(CancellationToken cancellationToken = default)
         => await _context.Products.CountAsync(cancellationToken);
 
+    public async Task<bool> ExistsByIdAsync(int id, CancellationToken cancellationToken = default)
+        => await _context.Products.AnyAsync(p => p.Id == id, cancellationToken);
+
     public async Task<ProductDto?> GetByIdAsync(int id)
     {
         var p = await _context.Products.FindAsync(id);
